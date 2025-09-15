@@ -55,6 +55,17 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
     fileName: '',
   });
 
+  // Delete 확인 Modal 상태 관리
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
+    isOpen: boolean;
+    fileId: string | null;
+    fileName: string;
+  }>({
+    isOpen: false,
+    fileId: null,
+    fileName: '',
+  });
+
   // Toast 표시 함수
   const showToast = useCallback((message: string, type: 'success' | 'error' | 'warning') => {
     setToast({ isVisible: true, message, type });
@@ -152,18 +163,42 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
     }
   }, []);
 
-  const handleDeleteFile = useCallback(
-    async (fileId: string) => {
+  const handleDeleteClick = useCallback((fileId: string, fileName: string) => {
+    setDeleteConfirmModal({
+      isOpen: true,
+      fileId,
+      fileName,
+    });
+  }, []);
+
+  const handleDeleteConfirm = useCallback(
+    async () => {
+      if (!deleteConfirmModal.fileId) return;
+      
       try {
-        await deleteFile(fileId);
-        onFileDelete(fileId);
+        await deleteFile(deleteConfirmModal.fileId);
+        onFileDelete(deleteConfirmModal.fileId);
         showToast('파일이 성공적으로 삭제되었습니다.', 'success');
       } catch (error) {
         showToast('파일 삭제에 실패했습니다.', 'error');
+      } finally {
+        setDeleteConfirmModal({
+          isOpen: false,
+          fileId: null,
+          fileName: '',
+        });
       }
     },
-    [onFileDelete, showToast]
+    [deleteConfirmModal.fileId, onFileDelete, showToast]
   );
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteConfirmModal({
+      isOpen: false,
+      fileId: null,
+      fileName: '',
+    });
+  }, []);
 
   const handleAlign = useCallback((fileId: string, fileName: string) => {
     setAlignmentModal({
@@ -268,7 +303,7 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
               </button>
               <button 
                 className="ml-4 p-1 rounded bg-background-tertiary transition-colors flex-shrink-0 text-text-muted hover:text-status-error hover:bg-[var(--color-error-bg)]"
-                onClick={() => handleDeleteFile(file.id)}
+                onClick={() => handleDeleteClick(file.id, file.filename)}
                 title="파일 삭제"
               >
                 <svg 
@@ -338,6 +373,43 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
                 className="px-4 py-2 bg-accent-primary text-white rounded hover:opacity-80 transition-opacity"
               >
                 업로드
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-background-card rounded-lg p-6 max-w-md w-full mx-4 border border-border">
+            <div className="flex items-center mb-4">
+              <span className="text-2xl mr-3">🗑️</span>
+              <h3 className="text-lg font-semibold text-text-primary">파일 삭제 확인</h3>
+            </div>
+            <div className="mb-6">
+              <p className="text-text-secondary mb-2">다음 파일을 삭제하시겠습니까?</p>
+              <div className="bg-background-tertiary rounded p-3 border border-border">
+                <div className="text-text-primary font-medium">
+                  {deleteConfirmModal.fileName}
+                </div>
+                <div className="text-status-error text-sm">
+                  ⚠️ 삭제된 파일은 복구할 수 없습니다.
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleDeleteCancel}
+                className="px-4 py-2 text-text-secondary border border-border rounded hover:bg-background-tertiary transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="px-4 py-2 bg-status-error text-white rounded hover:opacity-80 transition-opacity"
+              >
+                삭제
               </button>
             </div>
           </div>

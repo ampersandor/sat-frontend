@@ -393,9 +393,24 @@ export function InfiniteJobList() {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-text-primary font-medium">{job.baseName}</h3>
-                  {job.jobStatus === 'SUCCESS' && (
-                    <span className="text-xs text-accent-primary opacity-70">📊 클릭하여 통계 보기</span>
-                  )}
+                  {(job.jobStatus === 'PENDING' || job.jobStatus === "ERROR") && (
+                    <span className="text-xs text-accent-primary opacity-70">
+                      문의하기: {job.id}{" "}
+                      {job.taskId && (
+                        <a 
+                          href={`http://localhost:5555/task/${job.taskId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:text-accent-secondary transition-colors"
+                          onClick={(e) => e.stopPropagation()} // 카드 클릭 이벤트와 분리
+                        >
+                          {job.taskId}
+                        </a>
+                      )}
+                    </span>
+                  ) || (job.jobStatus === "SUCCESS" && (
+                    <span className="text-xs text-accent-primary opacity-70"> {'📊 클릭하여 통계 보기'}</span>
+                  ))}
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <span className="text-text-secondary">
