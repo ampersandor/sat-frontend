@@ -1,0 +1,377 @@
+# SAT Frontend Development Cursor Rules
+
+## Project Context
+You are working on a frontend application that interfaces with the SAT (Sequence Alignment Tool) backend API. The backend provides file upload/download, sequence alignment processing, and job management functionality.
+
+
+## API Base Configuration
+```javascript
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
+```
+
+## Core API Endpoints Reference
+
+### File Management
+- Upload: `POST /artifact/upload` (multipart/form-data)
+- Download: `GET /artifact/download/{artifactId}` 
+- List: `GET /artifact/list/{artifactType}` (INPUT/OUTPUT)
+
+### Alignment Processing
+- Start: `POST /analyze/align/{artifactId}`
+- Update: `POST /analyze/update`
+
+### Job Management
+- List: `GET /jobs` (paginated)
+- Real-time updates: `GET /jobs/sse` (Server-Sent Events)
+
+### Health
+- Check: `GET /health`
+
+## Data Types & Enums
+
+### JobStatus
+```typescript
+type JobStatus = 'PENDING' | 'RUNNING' | 'SUCCESS' | 'ERROR';
+```
+
+### ArtifactType
+```typescript
+type ArtifactType = 'INPUT' | 'OUTPUT';
+```
+
+### Tool
+```typescript
+type Tool = 'mafft' | 'uclust' | 'vsearch';
+```
+
+### DTOs
+```typescript
+interface ArtifactDto {
+  id: string;
+  filename: string;
+  directory: string;
+  createdAt: string;
+  size: number;
+  artifactType: ArtifactType;
+}
+
+interface JobDto {
+  id: string;
+  taskId: string;
+  inputArtifactId: string;
+  baseName: string;
+  dirName: string;
+  tool: Tool;
+  options: string;
+  createdAt: string;
+  updatedAt: string;
+  outputArtifactId: string;
+  jobStatus: JobStatus;
+  message: string;
+}
+
+interface JobRequest {
+  tool: Tool;
+  options: string;
+}
+
+interface JobUpdateRequest {
+  task_id: string;
+  status: JobStatus;
+  output_file: string;
+  output_dir: string;
+  message: string;
+}
+```
+
+## Frontend Development Guidelines
+
+### 1. API Client Setup
+Always use a centralized API client with proper error handling:
+
+```typescript
+class ApiClient {
+  private baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
+  
+  async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+    
+    return response.json();
+  }
+}
+```
+
+### 2. File Upload Handling
+When implementing file upload:
+- Use FormData for multipart uploads
+- Show upload progress if possible
+- Validate file types/sizes on frontend before upload
+- Handle upload errors gracefully
+
+```typescript
+const uploadFile = async (file: File): Promise<ArtifactDto> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
+  const response = await fetch(`${apiUrl}/artifact/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  
+  if (!response.ok) {
+    throw new Error('Upload failed');
+  }
+  
+  return response.json();
+};
+```
+
+### 3. Server-Sent Events (SSE) for Real-time Updates
+Implement SSE for job status monitoring:
+
+```typescript
+class JobMonitor {
+  private eventSource: EventSource | null = null;
+  private apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
+  
+  connect(onUpdate: (job: JobDto) => void) {
+    this.eventSource = new EventSource(`${this.apiUrl}/jobs/sse`);
+    
+    this.eventSource.onmessage = (event) => {
+      const job = JSON.parse(event.data);
+      onUpdate(job);
+    };
+    
+    this.eventSource.onerror = () => {
+      console.error('SSE connection error');
+      this.reconnect(onUpdate);
+    };
+  }
+  
+  disconnect() {
+    this.eventSource?.close();
+  }
+  
+  private reconnect(onUpdate: (job: JobDto) => void) {
+    const delay = import.meta.env.VITE_SSE_RECONNECT_DELAY || 5000;
+    setTimeout(() => this.connect(onUpdate), delay);
+  }
+}
+```
+
+### 4. Job Status Management
+Create a state management solution for jobs:
+
+```typescript
+interface JobState {
+  jobs: Map<string, JobDto>;
+  loading: boolean;
+  error: string | null;
+}
+
+// Use Redux, Zustand, or Context API for state management
+const useJobStore = create<JobState>((set) => ({
+  jobs: new Map(),
+  loading: false,
+  error: null,
+  
+  updateJob: (job: JobDto) => set((state) => {
+    const jobs = new Map(state.jobs);
+    jobs.set(job.id, job);
+    return { jobs };
+  }),
+}));
+```
+
+### 5. Error Handling
+Implement comprehensive error handling:
+
+```typescript
+interface ApiError {
+  timestamp: string;
+  status: number;
+  error: string;
+  message: string;
+  path: string;
+}
+
+const handleApiError = (error: ApiError) => {
+  switch (error.status) {
+    case 400:
+      // Handle bad request
+      break;
+    case 404:
+      // Handle not found
+      break;
+    case 500:
+      // Handle server error
+      break;
+    default:
+      // Handle unknown error
+  }
+};
+```
+
+### 6. UI/UX Patterns
+
+#### File Upload Component
+- Drag and drop support
+- File type validation
+- Upload progress indicator
+- Error messages for failed uploads
+
+#### Job List Component
+- Pagination controls
+- Real-time status updates via SSE
+- Status badges with colors (PENDING: yellow, RUNNING: blue, SUCCESS: green, ERROR: red)
+- Sortable columns
+- Filter by status
+
+#### Job Detail Component
+- Show all job information
+- Download output button (when status is SUCCESS)
+- Re-run job functionality
+- Copy job configuration
+
+### 7. Performance Optimizations
+- Implement pagination for job lists
+- Use React Query or SWR for data fetching and caching
+- Debounce search/filter inputs
+- Lazy load components
+- Virtualize long lists
+
+### 8. Testing Strategy
+```typescript
+// Example test for API calls
+describe('ArtifactService', () => {
+  it('should upload file successfully', async () => {
+    const file = new File(['content'], 'test.txt');
+    const result = await uploadFile(file);
+    expect(result.id).toBeDefined();
+    expect(result.artifactType).toBe('INPUT');
+  });
+});
+```
+
+### 9. Environment Variables
+```env
+VITE_API_URL=http://localhost:8080/api/v1
+VITE_SSE_RECONNECT_DELAY=5000
+VITE_MAX_FILE_SIZE=104857600
+```
+
+### 10. Common Patterns
+
+#### Workflow: Upload → Process → Download
+```typescript
+const processSequenceAlignment = async (file: File, tool: Tool, options: string) => {
+  try {
+    // 1. Upload file
+    const artifact = await uploadFile(file);
+    
+    // 2. Start alignment job
+    const job = await startAlignment(artifact.id, { tool, options });
+    
+    // 3. Monitor job status
+    const monitor = new JobMonitor();
+    monitor.connect((updatedJob) => {
+      if (updatedJob.id === job.id) {
+        if (updatedJob.jobStatus === 'SUCCESS') {
+          // 4. Download result
+          downloadArtifact(updatedJob.outputArtifactId);
+          monitor.disconnect();
+        } else if (updatedJob.jobStatus === 'ERROR') {
+          // Handle error
+          monitor.disconnect();
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Processing failed:', error);
+  }
+};
+```
+
+## Component Structure Recommendations
+
+```
+src/
+  components/
+    common/
+      - LoadingSpinner.tsx
+      - ErrorBoundary.tsx
+      - Pagination.tsx
+    artifacts/
+      - FileUpload.tsx
+      - ArtifactList.tsx
+      - DownloadButton.tsx
+    jobs/
+      - JobList.tsx
+      - JobDetail.tsx
+      - JobStatusBadge.tsx
+      - JobMonitor.tsx
+    analysis/
+      - AlignmentForm.tsx
+      - ToolSelector.tsx
+      - OptionsInput.tsx
+  services/
+    - apiClient.ts
+    - artifactService.ts
+    - jobService.ts
+    - analysisService.ts
+  hooks/
+    - useJobMonitor.ts
+    - useFileUpload.ts
+    - usePagination.ts
+  store/
+    - jobStore.ts
+    - artifactStore.ts
+  types/
+    - api.types.ts
+    - common.types.ts
+  utils/
+    - formatters.ts
+    - validators.ts
+    - constants.ts
+```
+
+## Security Considerations
+- Validate file types and sizes on the frontend
+- Implement CORS properly
+- Use HTTPS in production
+- Sanitize user inputs
+- Handle sensitive data appropriately
+
+## Accessibility Requirements
+- Use semantic HTML
+- Provide ARIA labels
+- Ensure keyboard navigation
+- Support screen readers
+- Maintain proper color contrast
+
+## Browser Compatibility
+- Support modern browsers (Chrome, Firefox, Safari, Edge)
+- Provide fallbacks for older browsers
+- Test SSE compatibility
+- Handle file download across browsers
+
+## Deployment Checklist
+- [ ] Environment variables configured
+- [ ] API endpoints updated for production
+- [ ] Error tracking configured
+- [ ] Performance monitoring setup
+- [ ] SSL certificates configured
+- [ ] CORS settings verified
+- [ ] File size limits configured
+- [ ] Rate limiting implemented
