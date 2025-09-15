@@ -9,21 +9,36 @@ const config: Config = {
     extend: {
       colors: {
         background: {
-          primary: '#17171c',
-          secondary: '#22252f',
-          tertiary: '#3f3c3c',
+          primary: 'var(--color-bg-primary)',
+          secondary: 'var(--color-bg-secondary)',
+          tertiary: 'var(--color-bg-tertiary)',
+          card: 'var(--color-bg-card)',
+          input: 'var(--color-bg-input)',
         },
         text: {
-          primary: '#ffffff',
-          secondary: '#9f9f9f',
-          muted: '#636363',
-          header: '#757575',
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
+          muted: 'var(--color-text-muted)',
+          header: 'var(--color-text-header)',
         },
         accent: {
-          primary: '#005aeb',
-          secondary: '#00b2ff',
+          primary: 'var(--color-accent-primary)',
+          secondary: 'var(--color-accent-secondary)',
         },
-        border: '#d4d4d4',
+        border: {
+          DEFAULT: 'var(--color-border)',
+          hover: 'var(--color-border-hover)',
+        },
+        status: {
+          success: 'var(--color-success)',
+          'success-bg': 'var(--color-success-bg)',
+          warning: 'var(--color-warning)',
+          'warning-bg': 'var(--color-warning-bg)',
+          error: 'var(--color-error)',
+          'error-bg': 'var(--color-error-bg)',
+          info: 'var(--color-info)',
+          'info-bg': 'var(--color-info-bg)',
+        },
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],

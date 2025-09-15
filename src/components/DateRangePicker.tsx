@@ -161,17 +161,17 @@ export function DateRangePicker({
       {/* 트리거 버튼 */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-3 py-2 bg-[#22252f] text-white text-sm rounded border border-[#2a2b3a] focus:border-blue-400 focus:outline-none text-left flex items-center justify-between"
+        className="w-full px-3 py-2 bg-background-input text-text-primary text-sm rounded border border-border focus:border-accent-primary focus:outline-none text-left flex items-center justify-between"
       >
-        <span className={value.startDate || value.endDate ? 'text-white' : 'text-gray-400'}>
+        <span className={value.startDate || value.endDate ? 'text-text-primary' : 'text-text-muted'}>
           {formatDateRange()}
         </span>
-        <span className="text-gray-400">📅</span>
+        <span className="text-text-muted">📅</span>
       </button>
 
       {/* 달력 드롭다운 */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 bg-[#1a1b26] border border-[#2a2b3a] rounded-lg shadow-lg z-50 p-4 min-w-[320px]">
+        <div className="absolute top-full left-0 mt-1 bg-background-card border border-border rounded-lg shadow-lg z-50 p-4 min-w-[320px]">
           {/* 헤더 */}
           <div className="flex items-center justify-between mb-4">
             <button
@@ -183,11 +183,11 @@ export function DateRangePicker({
                   setCurrentMonth(currentMonth - 1);
                 }
               }}
-              className="p-1 hover:bg-[#2a2b3a] rounded"
+              className="p-1 bg-background-tertiary hover:bg-background-tertiary rounded text-text-primary"
             >
               ◀
             </button>
-            <h3 className="text-white font-medium">
+            <h3 className="text-text-primary font-medium">
               {currentYear}년 {currentMonth + 1}월
             </h3>
             <button
@@ -199,7 +199,7 @@ export function DateRangePicker({
                   setCurrentMonth(currentMonth + 1);
                 }
               }}
-              className="p-1 hover:bg-[#2a2b3a] rounded"
+              className="p-1 bg-background-tertiary hover:bg-background-tertiary rounded text-text-primary"
             >
               ▶
             </button>
@@ -208,7 +208,7 @@ export function DateRangePicker({
           {/* 요일 헤더 */}
           <div className="grid grid-cols-7 gap-1 mb-2">
             {['일', '월', '화', '수', '목', '금', '토'].map(day => (
-              <div key={day} className="text-center text-xs text-gray-400 py-1">
+              <div key={day} className="text-center text-xs text-text-muted py-1">
                 {day}
               </div>
             ))}
@@ -232,11 +232,11 @@ export function DateRangePicker({
                   onMouseLeave={() => setHoverDate(null)}
                   className={`
                     h-8 w-8 text-xs rounded flex items-center justify-center transition-colors
-                    ${!isCurrentMonth ? 'text-gray-600' : 'text-white hover:bg-[#2a2b3a]'}
-                    ${isToday ? 'bg-blue-500/20 text-blue-400' : ''}
-                    ${isSelected ? 'bg-blue-500/60 text-white' : ''}
-                    ${isStart ? 'bg-blue-600 text-white font-semibold' : ''}
-                    ${isEnd ? 'bg-blue-600 text-white font-semibold' : ''}
+                    ${!isCurrentMonth ? 'text-text-muted' : 'text-text-primary hover:bg-background-tertiary'}
+                    ${isToday ? 'bg-status-info text-status-info' : ''}
+                    ${isSelected ? 'bg-accent-primary text-text-primary' : 'bg-background-tertiary'}
+                    ${isStart ? 'bg-accent-primary text-text-primary font-semibold' : ''}
+                    ${isEnd ? 'bg-accent-primary text-text-primary font-semibold' : ''}
                     ${isStart && isEnd ? 'rounded-full' : ''}
                     ${isStart && !isEnd ? 'rounded-l-full' : ''}
                     ${isEnd && !isStart ? 'rounded-r-full' : ''}
@@ -249,23 +249,23 @@ export function DateRangePicker({
           </div>
 
           {/* 액션 버튼 */}
-          <div className="flex justify-between items-center mt-4 pt-3 border-t border-[#2a2b3a]">
+          <div className="flex justify-between items-center mt-4 pt-3 border-t border-border">
             <button
               onClick={handleClear}
-              className="px-3 py-1 text-xs text-gray-400 hover:text-white transition-colors"
+              className="px-3 py-1 text-xs bg-background-tertiary text-text-muted hover:text-text-primary transition-colors"
             >
               초기화
             </button>
             <div className="flex gap-2">
               <button
                 onClick={() => setIsOpen(false)}
-                className="px-3 py-1 text-xs text-gray-400 hover:text-white transition-colors"
+                className="px-3 py-1 text-xs bg-background-tertiary text-text-muted hover:text-text-primary transition-colors"
               >
                 취소
               </button>
               <button
                 onClick={handleApply}
-                className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                className="px-3 py-1 text-xs bg-accent-primary text-white rounded hover:opacity-80 transition-opacity"
               >
                 적용
               </button>
@@ -275,14 +275,14 @@ export function DateRangePicker({
           {/* 선택 상태 안내 */}
           <div className="mt-2 text-xs text-center">
             {selectionStep === 'start' ? (
-              <span className="text-gray-400">시작 날짜를 선택하세요</span>
+              <span className="text-text-muted">시작 날짜를 선택하세요</span>
             ) : (
               <div className="space-y-1">
-                <span className="text-blue-400">
+                <span className="text-accent-primary">
                   시작: {tempRange.startDate} 
                 </span>
                 <br />
-                <span className="text-gray-400">종료 날짜를 선택하세요</span>
+                <span className="text-text-muted">종료 날짜를 선택하세요</span>
               </div>
             )}
           </div>

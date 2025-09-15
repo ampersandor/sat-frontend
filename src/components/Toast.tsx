@@ -24,13 +24,13 @@ export function Toast({ isVisible, message, type, onClose, duration = 3000 }: To
   const getIconAndColor = () => {
     switch (type) {
       case 'success':
-        return { icon: '✅', bgColor: 'bg-green-600', borderColor: 'border-green-500' };
+        return { icon: '✅', bgColor: 'bg-status-success', borderColor: 'border-status-success' };
       case 'error':
-        return { icon: '❌', bgColor: 'bg-red-600', borderColor: 'border-red-500' };
+        return { icon: '❌', bgColor: 'bg-status-error', borderColor: 'border-status-error' };
       case 'warning':
-        return { icon: '⚠️', bgColor: 'bg-yellow-600', borderColor: 'border-yellow-500' };
+        return { icon: '⚠️', bgColor: 'bg-status-warning', borderColor: 'border-status-warning' };
       default:
-        return { icon: 'ℹ️', bgColor: 'bg-blue-600', borderColor: 'border-blue-500' };
+        return { icon: 'ℹ️', bgColor: 'bg-status-info', borderColor: 'border-status-info' };
     }
   };
 
@@ -47,7 +47,7 @@ export function Toast({ isVisible, message, type, onClose, duration = 3000 }: To
       <div className={`${bgColor} ${borderColor} border rounded-lg shadow-lg p-4 max-w-sm w-full`}>
         <div className="flex items-center">
           <span className="text-xl mr-3">{icon}</span>
-          <p className="text-white text-sm font-medium">{message}</p>
+          <p className="text-text-primary text-sm font-medium">{message}</p>
         </div>
       </div>
     </div>

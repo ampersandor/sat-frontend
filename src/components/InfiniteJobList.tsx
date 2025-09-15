@@ -280,9 +280,9 @@ export function InfiniteJobList() {
 
   return (
     <div className="h-full overflow-y-auto bg-background-primary rounded-lg"
-         style={{ scrollbarWidth: 'thin', scrollbarColor: '#9ca3af transparent' }}>
+         style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--scrollbar-thumb) var(--scrollbar-track)' }}>
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-white text-base font-semibold">
+        <h2 className="text-text-primary text-base font-semibold">
           작업 목록
           {(() => {
             const activeFilters = [
@@ -292,7 +292,7 @@ export function InfiniteJobList() {
               filters.status && '상태'
             ].filter(Boolean);
             return activeFilters.length > 0 && (
-              <span className="ml-2 text-xs text-blue-400 font-normal">
+              <span className="ml-2 text-xs text-accent-primary font-normal">
                 ({activeFilters.join(', ')} 필터 적용됨)
               </span>
             );
@@ -300,7 +300,7 @@ export function InfiniteJobList() {
         </h2>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
+          className="text-sm bg-background-tertiary text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1"
         >
           {showFilters ? '필터 숨기기' : '필터 표시'}
           <span className={`transition-transform ${showFilters ? 'rotate-180' : ''}`}>▼</span>
@@ -309,15 +309,15 @@ export function InfiniteJobList() {
 
       {/* Filter Section */}
       {showFilters && (
-        <div className="mb-4 p-4 bg-[#1a1b26] rounded-lg border border-[#2a2b3a]">
+        <div className="mb-4 p-4 bg-background-card rounded-lg border border-border">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Input File Filter */}
             <div>
-              <label className="block text-xs text-gray-400 mb-2">입력 파일</label>
+              <label className="block text-xs text-text-secondary mb-2">입력 파일</label>
               <select
                 value={filters.inputArtifactId || ''}
                 onChange={(e) => handleFilterChange({ inputArtifactId: e.target.value || undefined })}
-                className="w-full px-3 py-2 bg-[#22252f] text-white text-sm rounded border border-[#2a2b3a] focus:border-blue-400 focus:outline-none"
+                className="w-full px-3 py-2 bg-background-input text-text-primary text-sm rounded border border-border focus:border-accent-primary focus:outline-none"
               >
                 <option value="">전체</option>
                 {files.map(file => (
@@ -328,11 +328,11 @@ export function InfiniteJobList() {
 
             {/* Tool Filter */}
             <div>
-              <label className="block text-xs text-gray-400 mb-2">도구</label>
+              <label className="block text-xs text-text-secondary mb-2">도구</label>
               <select
                 value={filters.tool || ''}
                 onChange={(e) => handleFilterChange({ tool: e.target.value || undefined })}
-                className="w-full px-3 py-2 bg-[#22252f] text-white text-sm rounded border border-[#2a2b3a] focus:border-blue-400 focus:outline-none"
+                className="w-full px-3 py-2 bg-background-input text-text-primary text-sm rounded border border-border focus:border-accent-primary focus:outline-none"
               >
                 <option value="">전체</option>
                 <option value="mafft">MAFFT</option>
@@ -343,7 +343,7 @@ export function InfiniteJobList() {
 
             {/* Date Range Filter */}
             <div>
-              <label className="block text-xs text-gray-400 mb-2">날짜 범위</label>
+              <label className="block text-xs text-text-secondary mb-2">날짜 범위</label>
               <DateRangePicker
                 value={dateRange}
                 onChange={handleDateRangeChange}
@@ -354,11 +354,11 @@ export function InfiniteJobList() {
 
             {/* Status Filter */}
             <div>
-              <label className="block text-xs text-gray-400 mb-2">상태</label>
+              <label className="block text-xs text-text-secondary mb-2">상태</label>
               <select
                 value={filters.status || ''}
                 onChange={(e) => handleFilterChange({ status: e.target.value || undefined })}
-                className="w-full px-3 py-2 bg-[#22252f] text-white text-sm rounded border border-[#2a2b3a] focus:border-blue-400 focus:outline-none"
+                className="w-full px-3 py-2 bg-background-input text-text-primary text-sm rounded border border-border focus:border-accent-primary focus:outline-none"
               >
                 <option value="">전체</option>
                 <option value="PENDING">대기중</option>
@@ -370,8 +370,8 @@ export function InfiniteJobList() {
           </div>
 
           <div className="mt-4 flex justify-between items-center">
-            <p className="text-xs text-gray-500">* 날짜 범위를 지정하여 특정 기간의 작업만 조회할 수 있습니다</p>
-            <button onClick={clearFilters} className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">
+            <p className="text-xs text-text-muted">* 날짜 범위를 지정하여 특정 기간의 작업만 조회할 수 있습니다</p>
+            <button onClick={clearFilters} className="px-4 py-2 text-sm bg-background-tertiary text-text-secondary hover:text-text-primary transition-colors">
               필터 초기화
             </button>
           </div>
@@ -383,8 +383,8 @@ export function InfiniteJobList() {
         {displayJobs.map((job) => (
           <div
             key={toKey(job.id)}
-            className={`p-4 bg-[#1a1b26] rounded-lg border border-[#2a2b3a] hover:border-[#3a3b4a] transition-colors ${
-              job.jobStatus === 'SUCCESS' ? 'cursor-pointer hover:bg-[#1e1f2a]' : ''
+            className={`p-4 bg-background-card rounded-lg border border-border hover:border-border-hover transition-colors ${
+              job.jobStatus === 'SUCCESS' ? 'cursor-pointer hover:bg-background-tertiary' : ''
             }`}
             onClick={() => handleJobClick(job)}
             title={job.jobStatus === 'SUCCESS' ? '클릭하여 통계 보기' : ''}
@@ -392,21 +392,21 @@ export function InfiniteJobList() {
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className="text-white font-medium">{job.baseName}</h3>
+                  <h3 className="text-text-primary font-medium">{job.baseName}</h3>
                   {job.jobStatus === 'SUCCESS' && (
-                    <span className="text-xs text-blue-400 opacity-70">📊 클릭하여 통계 보기</span>
+                    <span className="text-xs text-accent-primary opacity-70">📊 클릭하여 통계 보기</span>
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="text-gray-400">
-                    도구: <span className="text-blue-400">{job.tool?.toUpperCase?.() ?? job.tool}</span>
+                  <span className="text-text-secondary">
+                    도구: <span className="text-accent-primary">{job.tool?.toUpperCase?.() ?? job.tool}</span>
                   </span>
                   <span
                     className={`px-2 py-1 rounded text-xs font-medium ${
-                      job.jobStatus === 'SUCCESS' ? 'bg-green-500/20 text-green-400' :
-                      job.jobStatus === 'RUNNING' ? 'bg-blue-500/20 text-blue-400' :
-                      job.jobStatus === 'ERROR' ? 'bg-red-500/20 text-red-400' :
-                      'bg-yellow-500/20 text-yellow-400'
+                      job.jobStatus === 'SUCCESS' ? 'bg-status-success-bg text-status-success' :
+                      job.jobStatus === 'RUNNING' ? 'bg-status-info-bg text-status-info' :
+                      job.jobStatus === 'ERROR' ? 'bg-status-error-bg text-status-error' :
+                      'bg-status-warning-bg text-status-warning'
                     }`}
                   >
                     {job.jobStatus === 'SUCCESS' && '✅ 완료'}
@@ -416,22 +416,21 @@ export function InfiniteJobList() {
                   </span>
                 </div>
                 {job.options && (
-                  <p className="text-gray-500 text-xs mt-1">옵션: {job.options}</p>
+                  <p className="text-text-muted text-xs mt-1">옵션: {job.options}</p>
                 )}
                 {job.message && job.jobStatus === 'ERROR' && (
-                  <p className="text-red-400 text-xs mt-1">{job.message}</p>
+                  <p className="text-status-error text-xs mt-1">{job.message}</p>
                 )}
               </div>
               <div className="text-right">
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-text-muted">
                   {job.createdAt ? new Date(job.createdAt).toLocaleString('ko-KR') : ''}
                 </span>
                 {job.jobStatus === 'SUCCESS' && (job.alignArtifactId || job.statArtifactId) && (
                   <div className="mt-2 flex flex-col gap-1">
                     {job.alignArtifactId && (
                       <button
-                        className="px-3 py-1 text-white text-xs rounded hover:opacity-80 transition-opacity"
-                        style={{ backgroundColor: '#005aeb' }}
+                        className="px-3 py-1 text-white text-xs rounded hover:opacity-80 transition-opacity bg-accent-secondary"
                         onClick={async (e) => {
                           e.stopPropagation(); // 이벤트 버블링 방지
                           try {
@@ -446,8 +445,7 @@ export function InfiniteJobList() {
                     )}
                     {job.statArtifactId && (
                       <button
-                        className="px-3 py-1 text-white text-xs rounded hover:opacity-80 transition-opacity"
-                        style={{ backgroundColor: '#059669' }}
+                        className="px-3 py-1 text-white text-xs rounded hover:opacity-80 transition-opacity bg-accent-secondary"
                         onClick={async (e) => {
                           e.stopPropagation(); // 이벤트 버블링 방지
                           try {
@@ -471,13 +469,13 @@ export function InfiniteJobList() {
       {/* Loading indicator */}
       {loading && (
         <div className="flex justify-center py-4">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-accent-primary border-t-transparent rounded-full animate-spin" />
         </div>
       )}
 
       {/* Error message */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-center">{error}</div>
+        <div className="bg-status-error-bg border border-status-error/20 rounded-lg p-4 text-status-error text-center">{error}</div>
       )}
 
       {/* Observer target for infinite scroll */}
@@ -485,15 +483,15 @@ export function InfiniteJobList() {
 
       {/* No more items message */}
       {!hasMore && displayJobs.length > 0 && (
-        <div className="text-gray-500 text-center py-4 text-sm">모든 작업을 불러왔습니다.</div>
+        <div className="text-text-muted text-center py-4 text-sm">모든 작업을 불러왔습니다.</div>
       )}
 
       {/* Empty state */}
       {!loading && displayJobs.length === 0 && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📋</div>
-          <p className="text-gray-400">작업이 없습니다.</p>
-          <p className="text-gray-500 text-sm mt-2">새로운 정렬 작업을 시작해보세요.</p>
+          <p className="text-text-secondary">작업이 없습니다.</p>
+          <p className="text-text-muted text-sm mt-2">새로운 정렬 작업을 시작해보세요.</p>
         </div>
       )}
 

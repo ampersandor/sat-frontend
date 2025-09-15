@@ -8,7 +8,7 @@ import type { FileRecord, AlignmentRequest } from '../types';
 function Spinner() {
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[99] bg-black/40">
-      <div className="w-14 h-14 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-14 h-14 border-4 border-accent-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 }
@@ -208,30 +208,25 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
 
   return (
     <div className="w-full">
-      <h2 className="text-white text-xs mb-6">내 input 파일</h2>
+      <h2 className="text-text-primary text-xs mb-6">내 input 파일</h2>
       
       {/* 파일 업로드 영역 */}
       <div className="mb-4">
         <div 
-          className={`w-full h-[151px] transition-colors flex flex-col items-center justify-center cursor-pointer ${
-            isDragging ? 'border-blue-400' : ''
+          className={`w-full h-[151px] transition-colors flex flex-col items-center justify-center cursor-pointer bg-background-input border-2 border-dashed ${
+            isDragging ? 'border-accent-primary bg-background-tertiary' : 'border-border'
           }`}
-          style={{ 
-            backgroundColor: isDragging ? '#1a202c' : '#22252f',
-            border: 'none'
-          }}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
         >
-          <span className="text-xs mb-4" style={{ color: '#9f9f9f' }}>
+          <span className="text-xs mb-4 text-text-secondary">
             {uploading ? '업로드 중...' : '여기에 파일을 drag 하세요'}
           </span>
           {!uploading && (
             <button 
-              className="px-4 py-1.5 text-xs rounded hover:opacity-80 transition-opacity"
-              style={{ backgroundColor: '#3f3c3c', color: '#b7b7b7' }}
+              className="px-4 py-1.5 text-xs rounded hover:bg-background-input transition-colors bg-background-tertiary text-text-secondary border border-border"
               onClick={(e) => {
                 e.stopPropagation();
                 fileInputRef.current?.click();
@@ -252,38 +247,52 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
       </div>
 
       {/* 파일 목록 */}
-      <div className="rounded" style={{ backgroundColor: '#17171c' }}>
+      <div className="rounded bg-background-primary">
         <div 
           className="h-[524px] overflow-y-auto pr-2"
           style={{
             scrollbarWidth: 'thin',
-            scrollbarColor: '#9ca3af transparent'
+            scrollbarColor: 'var(--scrollbar-thumb) var(--scrollbar-track)'
           }}
         >
           {files.map((file, index) => (
-            <div key={file.id} className="flex items-center px-6 py-2 text-white text-xs hover:bg-white/5 transition-colors">
+            <div key={file.id} className="flex items-center px-6 py-2 text-text-primary text-xs hover:bg-background-tertiary/50 transition-colors">
               <span className="w-4">{index + 1}</span>
               <span className="flex-1 ml-6 truncate" title={file.filename}>{file.filename}</span>
               <span className="w-12 ml-4">{formatFileSize(file.size.toString())}</span>
               <button 
-                className="ml-4 px-3 py-1 text-white text-[10px] rounded hover:opacity-80 transition-opacity flex-shrink-0"
-                style={{ backgroundColor: '#005aeb' }}
+                className="ml-4 px-3 py-1 text-white text-[10px] rounded hover:opacity-80 transition-opacity flex-shrink-0 bg-accent-secondary"
                 onClick={() => handleAlign(file.id, file.filename)}
               >
                 align
               </button>
               <button 
-                className="ml-4 text-base hover:opacity-70 transition-opacity flex-shrink-0"
+                className="ml-4 p-1 rounded bg-background-tertiary transition-colors flex-shrink-0 text-text-muted hover:text-status-error hover:bg-[var(--color-error-bg)]"
                 onClick={() => handleDeleteFile(file.id)}
+                title="파일 삭제"
               >
-                🗑️
+                <svg 
+                  width="14" 
+                  height="14" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <polyline points="3,6 5,6 21,6"></polyline>
+                  <path d="m19,6v14a2,2 0 0,1 -2,2H7a2,2 0 0,1 -2,-2V6m3,0V4a2,2 0 0,1 2,-2h4a2,2 0 0,1 2,2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
               </button>
             </div>
           ))}
           
           {/* 빈 상태 메시지 */}
           {files.length === 0 && (
-            <div className="flex items-center justify-center h-full text-gray-500 text-xs">
+            <div className="flex items-center justify-center h-full text-text-muted text-xs">
               업로드된 파일이 없습니다
             </div>
           )}
@@ -301,18 +310,18 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
       {/* Upload Confirmation Modal */}
       {uploadConfirmModal.isOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-700">
+          <div className="bg-background-card rounded-lg p-6 max-w-md w-full mx-4 border border-border">
             <div className="flex items-center mb-4">
               <span className="text-2xl mr-3">📁</span>
-              <h3 className="text-lg font-semibold text-white">파일 업로드 확인</h3>
+              <h3 className="text-lg font-semibold text-text-primary">파일 업로드 확인</h3>
             </div>
             <div className="mb-6">
-              <p className="text-gray-300 mb-2">다음 파일을 업로드하시겠습니까?</p>
-              <div className="bg-gray-700 rounded p-3 border border-gray-600">
-                <div className="text-white font-medium">
+              <p className="text-text-secondary mb-2">다음 파일을 업로드하시겠습니까?</p>
+              <div className="bg-background-tertiary rounded p-3 border border-border">
+                <div className="text-text-primary font-medium">
                   {uploadConfirmModal.selectedFile?.name}
                 </div>
-                <div className="text-gray-400 text-sm">
+                <div className="text-text-muted text-sm">
                   크기: {uploadConfirmModal.selectedFile?.size ? `${Math.round(uploadConfirmModal.selectedFile.size / 1024)}KB` : 'Unknown'}
                 </div>
               </div>
@@ -320,13 +329,13 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
             <div className="flex justify-end space-x-3">
               <button
                 onClick={handleUploadCancel}
-                className="px-4 py-2 text-gray-300 border border-gray-600 rounded hover:bg-gray-700 transition-colors"
+                className="px-4 py-2 text-text-secondary border border-border rounded hover:bg-background-tertiary transition-colors"
               >
                 취소
               </button>
               <button
                 onClick={handleUploadConfirm}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-accent-primary text-white rounded hover:opacity-80 transition-opacity"
               >
                 업로드
               </button>
