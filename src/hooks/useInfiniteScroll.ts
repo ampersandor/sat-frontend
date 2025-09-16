@@ -31,6 +31,7 @@ export function useInfiniteScroll<T>({
   
   const observerTarget = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(false);
+  const fetcherRef = useRef(fetcher);
 
   const loadMore = useCallback(async () => {
     if (isLoadingRef.current || !hasMore) return;
@@ -40,7 +41,7 @@ export function useInfiniteScroll<T>({
     setError(null);
 
     try {
-      const response = await fetcher(page, pageSize);
+      const response = await fetcherRef.current(page, pageSize);
       
       setItems(prev => [...prev, ...response.content]);
       setHasMore(!response.last);
@@ -51,7 +52,7 @@ export function useInfiniteScroll<T>({
       setLoading(false);
       isLoadingRef.current = false;
     }
-  }, [fetcher, page, pageSize, hasMore]);
+  }, [page, pageSize, hasMore]); // fetcher 제거하여 무한 루프 방지
 
   const reset = useCallback(() => {
     setItems([]);
@@ -89,11 +90,20 @@ export function useInfiniteScroll<T>({
     };
   }, [loadMore, hasMore]);
 
+  // Update fetcher ref
+  useEffect(() => {
+    fetcherRef.current = fetcher;
+  }, [fetcher]);
+
   // Initial load
   useEffect(() => {
-    if (items.length === 0 && hasMore && !isLoadingRef.current) {
+    let mounted = true;
+    if (mounted && items.length === 0 && hasMore && !isLoadingRef.current) {
       loadMore();
     }
+    return () => {
+      mounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
