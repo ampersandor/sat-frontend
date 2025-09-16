@@ -71,7 +71,7 @@ export class JobService {
 export class JobMonitor {
   private eventSource: EventSource | null = null;
   private apiUrl: string;
-  private reconnectTimer: NodeJS.Timeout | null = null;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 3;
   private reconnectDelay: number;
