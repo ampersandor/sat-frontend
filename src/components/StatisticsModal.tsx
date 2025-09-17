@@ -13,6 +13,7 @@ export function StatisticsModal({ isOpen, onClose, jobId, jobName }: StatisticsM
   const [statistics, setStatistics] = useState<JobStatistics | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     if (isOpen && jobId) {
@@ -42,6 +43,48 @@ export function StatisticsModal({ isOpen, onClose, jobId, jobName }: StatisticsM
     return `${(ratio * 100).toFixed(2)}%`;
   };
 
+  const generateStatisticsText = (stats: JobStatistics) => {
+    const blueBaseCountText = typeof stats.blueBaseCount === 'object' && stats.blueBaseCount
+      ? Object.entries(stats.blueBaseCount).map(([key, value]) => `  ${key}: ${formatNumber(Number(value))}`).join('\n')
+      : stats.blueBaseCount.toString();
+
+    return `정렬 통계 - ${jobName || 'Job'}
+
+Total Seq: ${formatNumber(stats.totalSeq)}
+Gap Seq Count: ${formatNumber(stats.gapSeqCount)}
+Gap Count: ${formatNumber(stats.gapCount)}
+Gap Frequency: ${formatNumber(stats.gapFrequency)}
+Sum of Gap Length: ${formatNumber(stats.sumOfGapLength)}
+Gap Length: ${formatNumber(stats.gapLength)}
+Sum of Blue Bases: ${formatNumber(stats.sumOfBlueBases)}
+No Blue Bases: ${formatNumber(stats.noBlueBases)}
+No Miss Bases: ${formatNumber(stats.noMissBases)}
+Blue Base Ratio: ${formatPercentage(stats.blueBaseRatio)}
+Blue Base:
+${blueBaseCountText}`;
+  };
+
+  const handleCopyStatistics = async () => {
+    if (!statistics) return;
+
+    try {
+      await navigator.clipboard.writeText(generateStatisticsText(statistics));
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('복사 실패:', err);
+      // 폴백: 텍스트 선택
+      const textArea = document.createElement('textarea');
+      textArea.value = generateStatisticsText(statistics);
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -54,12 +97,27 @@ export function StatisticsModal({ isOpen, onClose, jobId, jobName }: StatisticsM
               <p className="text-xs text-gray-400 mt-1">{jobName}</p>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors text-xl"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            {statistics && (
+              <button
+                onClick={handleCopyStatistics}
+                className={`px-3 py-1.5 rounded text-sm transition-all duration-200 ${
+                  copySuccess
+                    ? 'bg-green-500 text-white'
+                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                }`}
+                disabled={copySuccess}
+              >
+                {copySuccess ? '✓ 복사됨' : '📋 복사'}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white transition-colors text-xl"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {loading && (
