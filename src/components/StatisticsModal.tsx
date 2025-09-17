@@ -89,7 +89,7 @@ ${blueBaseCountText}`;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#1a1b26] text-white rounded-lg p-4 max-w-4xl w-full mx-4 max-h-[85vh] overflow-y-auto">
+      <div className="bg-[#1a1b26] text-white rounded-lg p-4 max-w-4xl w-full mx-4 max-h-[85vh] min-h-[400px] overflow-y-auto transition-all duration-200">
         <div className="flex justify-between items-center mb-4">
           <div>
             <h2 className="text-lg font-semibold text-white">정렬 통계</h2>
@@ -121,9 +121,26 @@ ${blueBaseCountText}`;
         </div>
 
         {loading && (
-          <div className="flex justify-center items-center py-6">
-            <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <span className="ml-3 text-gray-400 text-sm">통계 데이터를 불러오는 중...</span>
+          <div className="flex flex-col justify-center items-center py-16 animate-fade-in">
+            <div className="relative mb-6">
+              {/* 메인 스피너 */}
+              <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+              {/* 보조 스피너 */}
+              <div className="absolute inset-2 w-12 h-12 border-4 border-transparent border-r-blue-400 rounded-full animate-spin-slow" />
+              {/* 중앙 점 */}
+              <div className="absolute inset-6 w-4 h-4 bg-blue-500 rounded-full animate-pulse" />
+            </div>
+            <div className="text-center space-y-2">
+              <p className="text-gray-200 text-base font-medium">통계 데이터를 불러오는 중...</p>
+              <p className="text-gray-400 text-sm">정렬 결과를 분석하고 있습니다</p>
+              <div className="flex justify-center mt-3">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
