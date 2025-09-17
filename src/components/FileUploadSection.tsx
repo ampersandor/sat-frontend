@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { uploadFile, deleteFile, startAlignment } from '../services/api';
+import { uploadFile, deleteFile, startAlignment, downloadFile } from '../services/api';
 import { AlignmentModal } from './AlignmentModal';
 import { Toast } from './Toast';
 import type { FileRecord, AlignmentRequest } from '../types';
@@ -230,6 +230,15 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
     });
   }, []);
 
+  const handleDownload = useCallback(async (fileId: string, fileName: string) => {
+    try {
+      await downloadFile(fileId, fileName);
+      showToast('파일이 성공적으로 다운로드되었습니다.', 'success');
+    } catch (error) {
+      showToast('파일 다운로드에 실패했습니다.', 'error');
+    }
+  }, [showToast]);
+
   const formatFileSize = (size: string) => {
     if (size.includes('KB') || size.includes('MB') || size.includes('GB')) {
       return size;
@@ -302,7 +311,27 @@ export function FileUploadSection({ files, onFileUpload, onFileDelete }: FileUpl
                 align
               </button>
               <button 
-                className="ml-4 p-1 rounded bg-background-tertiary transition-colors flex-shrink-0 text-text-muted hover:text-status-error hover:bg-[var(--color-error-bg)]"
+                className="ml-2 p-1 rounded bg-background-tertiary transition-colors flex-shrink-0 text-text-muted hover:text-accent-primary hover:bg-background-input"
+                onClick={() => handleDownload(file.id, file.filename)}
+                title="파일 다운로드"
+              >
+                <svg 
+                  width="14" 
+                  height="14" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7,10 12,15 17,10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+              </button>
+              <button 
+                className="ml-2 p-1 rounded bg-background-tertiary transition-colors flex-shrink-0 text-text-muted hover:text-status-error hover:bg-[var(--color-error-bg)]"
                 onClick={() => handleDeleteClick(file.id, file.filename)}
                 title="파일 삭제"
               >

@@ -48,9 +48,9 @@ export async function getFileList(): Promise<FileRecord[]> {
 }
 
 // 파일 다운로드
-export async function downloadFile(fileId: number, filename: string): Promise<void> {
+export async function downloadFile(fileId: string, filename: string): Promise<void> {
   try {
-    await artifactService.download(fileId.toString(), filename);
+    await artifactService.download(fileId, filename);
     console.log(`✅ 파일 다운로드 완료: ${filename}`);
   } catch (error) {
     console.error('❌ 파일 다운로드 오류:', error);
