@@ -21,6 +21,44 @@ export function StatisticsModal({ isOpen, onClose, jobId, jobName }: StatisticsM
     }
   }, [isOpen, jobId]);
 
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isOpen, onClose]);
+
+  // 모달 열릴 때 배경 스크롤 막기
+  useEffect(() => {
+    if (isOpen) {
+      // 현재 스크롤 위치 저장
+      const scrollY = window.scrollY;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      
+      return () => {
+        // 모달 닫을 때 스크롤 복원
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
+
   const loadStatistics = async () => {
     try {
       setLoading(true);
@@ -85,16 +123,26 @@ ${blueBaseCountText}`;
     }
   };
 
+  // 배경 클릭 시 모달 닫기
+  const handleBackdropClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#1a1b26] text-white rounded-lg p-4 max-w-4xl w-full mx-4 max-h-[85vh] min-h-[400px] overflow-y-auto transition-all duration-200">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={handleBackdropClick}
+    >
+      <div className="bg-background-primary text-white rounded-lg p-4 max-w-4xl w-full mx-4 max-h-[85vh] min-h-[400px] overflow-y-auto transition-all duration-200">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h2 className="text-lg font-semibold text-white">정렬 통계</h2>
+            <h2 className="text-lg font-semibold text-text-primary">정렬 통계</h2>
             {jobName && (
-              <p className="text-xs text-gray-400 mt-1">{jobName}</p>
+              <p className="text-xs text-text-muted mt-1">{jobName}</p>
             )}
           </div>
           <div className="flex items-center gap-2">
@@ -103,8 +151,8 @@ ${blueBaseCountText}`;
                 onClick={handleCopyStatistics}
                 className={`px-3 py-1.5 rounded text-sm transition-all duration-200 ${
                   copySuccess
-                    ? 'bg-green-500 text-white'
-                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                    ? 'bg-status-success text-text-primary'
+                    : 'bg-status-info hover:bg-status-info-hover text-text-primary'
                 }`}
                 disabled={copySuccess}
               >
@@ -113,7 +161,7 @@ ${blueBaseCountText}`;
             )}
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors text-xl"
+              className="w-8 h-8 flex items-center justify-center text-status-error hover:text-text-primary bg-background-primary hover:bg-background-secondary rounded-full transition-all duration-200 text-sm"
             >
               ✕
             </button>
@@ -162,67 +210,71 @@ ${blueBaseCountText}`;
             {/* 모든 통계를 하나의 그리드로 통합 */}
             <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
               {/* 기본 정보 */}
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">총 시퀀스 수</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.totalSeq)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">총 시퀀스 수</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.totalSeq)}</p>
               </div>
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">갭 시퀀스 수</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.gapSeqCount)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">갭 시퀀스 수</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.gapSeqCount)}</p>
               </div>
 
               {/* 갭 정보 */}
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">총 갭 개수</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.gapCount)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">총 갭 개수</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.gapCount)}</p>
               </div>
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">갭 빈도</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.gapFrequency)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">갭 빈도</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.gapFrequency)}</p>
               </div>
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">갭 길이 합계</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.sumOfGapLength)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">갭 길이 합계</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.sumOfGapLength)}</p>
               </div>
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">평균 갭 길이</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.gapLength)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">평균 갭 길이</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.gapLength)}</p>
               </div>
 
               {/* Blue Base 정보 */}
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">Blue Base 합계</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.sumOfBlueBases)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">Blue Base 합계</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.sumOfBlueBases)}</p>
               </div>
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">Blue Base 없음</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.noBlueBases)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">Blue Base 없음</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.noBlueBases)}</p>
               </div>
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">Blue Base 비율</p>
-                <p className="text-white text-lg font-semibold">{formatPercentage(statistics.blueBaseRatio)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">Blue Base 비율</p>
+                <p className="text-text-primary text-lg font-semibold">{formatPercentage(statistics.blueBaseRatio)}</p>
               </div>
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">Blue Base 카운트</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">Blue Base 카운트</p>
                 <div className="space-y-0.5">
                   {typeof statistics.blueBaseCount === 'object' && statistics.blueBaseCount ? (
-                    <div className="text-[8px] text-white font-mono leading-tight">
-                      {Object.entries(statistics.blueBaseCount).map(([key, value]) => (
-                        <div key={key} className="mb-0.5">
-                          {key}: {formatNumber(Number(value))}
-                        </div>
-                      ))}
-                    </div>
+                    <textarea
+                      className="w-full h-28 p-2 bg-background-primary border border-gray-600 rounded text-text-primary font-mono text-xs leading-tight resize-none focus:outline-none focus:border-blue-400 transition-colors overflow-y-auto"
+                      readOnly
+                      value={Object.entries(statistics.blueBaseCount)
+                        .map(([key, value]) => `${key}: ${formatNumber(Number(value))}`)
+                        .join('\n')}
+                    />
                   ) : (
-                    <p className="text-white text-lg font-semibold">{statistics.blueBaseCount}</p>
+                    <textarea
+                      className="w-full h-28 p-2 bg-background-primary border border-gray-600 rounded text-text-primary font-mono text-xs leading-tight resize-none focus:outline-none focus:border-blue-400 transition-colors"
+                      readOnly
+                      value={statistics.blueBaseCount.toString()}
+                    />
                   )}
                 </div>
               </div>
 
               {/* Miss Base 정보 */}
-              <div className="bg-[#22252f] p-3 rounded-lg">
-                <p className="text-gray-400 text-xs mb-1">Miss Base 없음</p>
-                <p className="text-white text-lg font-semibold">{formatNumber(statistics.noMissBases)}</p>
+              <div className="bg-background-secondary p-3 rounded-lg">
+                <p className="text-text-muted text-xs mb-1">Miss Base 없음</p>
+                <p className="text-text-primary text-lg font-semibold">{formatNumber(statistics.noMissBases)}</p>
               </div>
             </div>
 
@@ -230,21 +282,21 @@ ${blueBaseCountText}`;
             <div className="border-t border-[#2a2b3a] pt-3">
               <h3 className="text-sm font-medium text-blue-400 mb-2">요약</h3>
               <div className="grid grid-cols-3 gap-3 text-xs">
-                <div className="bg-[#22252f] p-2 rounded">
-                  <span className="text-gray-400 block">갭 시퀀스 비율</span>
-                  <span className="text-white font-semibold">
+                <div className="bg-background-secondary p-2 rounded">
+                  <span className="text-text-muted block">갭 시퀀스 비율</span>
+                  <span className="text-text-primary font-semibold">
                     {formatPercentage(statistics.gapSeqCount / statistics.totalSeq)}
                   </span>
                 </div>
-                <div className="bg-[#22252f] p-2 rounded">
-                  <span className="text-gray-400 block">평균 갭 수/시퀀스</span>
-                  <span className="text-white font-semibold">
+                <div className="bg-background-secondary p-2 rounded">
+                  <span className="text-text-muted block">평균 갭 수/시퀀스</span>
+                  <span className="text-text-primary font-semibold">
                     {(statistics.gapCount / statistics.totalSeq).toFixed(2)}
                   </span>
                 </div>
-                <div className="bg-[#22252f] p-2 rounded">
-                  <span className="text-gray-400 block">Blue Base 비율</span>
-                  <span className="text-white font-semibold">
+                <div className="bg-background-secondary p-2 rounded">
+                  <span className="text-text-muted block">Blue Base 비율</span>
+                  <span className="text-text-primary font-semibold">
                     {formatPercentage(statistics.blueBaseRatio)}
                   </span>
                 </div>
