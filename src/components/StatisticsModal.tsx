@@ -14,10 +14,20 @@ export function StatisticsModal({ isOpen, onClose, jobId, jobName }: StatisticsM
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
     if (isOpen && jobId) {
-      loadStatistics();
+      // 모달이 열릴 때 약간의 지연 후 로딩 시작 (부드러운 전환)
+      setTimeout(() => {
+        loadStatistics();
+      }, 150);
+    }
+    // 모달이 닫힐 때 상태 초기화
+    if (!isOpen) {
+      setStatistics(null);
+      setError(null);
+      setShowContent(false);
     }
   }, [isOpen, jobId]);
 
@@ -63,11 +73,27 @@ export function StatisticsModal({ isOpen, onClose, jobId, jobName }: StatisticsM
     try {
       setLoading(true);
       setError(null);
-      const stats = await jobService.getStatistics(jobId);
+      setShowContent(false);
+      
+      // 최소 로딩 시간 보장 (800ms)
+      const [stats] = await Promise.all([
+        jobService.getStatistics(jobId),
+        new Promise(resolve => setTimeout(resolve, 300))
+      ]);
+      
       setStatistics(stats);
+      
+      // 약간의 지연 후 콘텐츠 표시 (페이드 인 효과)
+      setTimeout(() => {
+        setShowContent(true);
+      }, 100);
+      
     } catch (err) {
       console.error('통계 로드 실패:', err);
       setError(err instanceof Error ? err.message : '통계를 불러오는데 실패했습니다.');
+      setTimeout(() => {
+        setShowContent(true);
+      }, 100);
     } finally {
       setLoading(false);
     }
@@ -134,10 +160,16 @@ ${blueBaseCountText}`;
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className={`fixed inset-0 bg-black flex items-center justify-center z-50 transition-all duration-300 ease-in-out ${
+        isOpen ? 'bg-opacity-50' : 'bg-opacity-0'
+      }`}
       onClick={handleBackdropClick}
     >
-      <div className="bg-background-primary text-white rounded-lg p-4 max-w-4xl w-full mx-4 max-h-[85vh] min-h-[400px] overflow-y-auto transition-all duration-200">
+      <div className={`bg-background-primary text-white rounded-lg p-4 max-w-4xl w-full mx-4 max-h-[85vh] min-h-[400px] overflow-y-auto transition-all duration-300 ease-in-out transform ${
+        isOpen 
+          ? 'opacity-100 scale-100 translate-y-0' 
+          : 'opacity-0 scale-95 translate-y-4'
+      }`}>
         <div className="flex justify-between items-center mb-4">
           <div>
             <h2 className="text-lg font-semibold text-text-primary">정렬 통계</h2>
@@ -169,23 +201,23 @@ ${blueBaseCountText}`;
         </div>
 
         {loading && (
-          <div className="flex flex-col justify-center items-center py-16 animate-fade-in">
+          <div className="flex flex-col justify-center items-center py-16 transition-all duration-300 ease-in-out animate-fade-in">
             <div className="relative mb-6">
               {/* 메인 스피너 */}
-              <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-16 h-16 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin transition-all duration-300" />
               {/* 보조 스피너 */}
-              <div className="absolute inset-2 w-12 h-12 border-4 border-transparent border-r-blue-400 rounded-full animate-spin-slow" />
+              <div className="absolute inset-2 w-12 h-12 border-4 border-transparent border-r-blue-400 rounded-full animate-spin-slow transition-all duration-300" />
               {/* 중앙 점 */}
-              <div className="absolute inset-6 w-4 h-4 bg-blue-500 rounded-full animate-pulse" />
+              <div className="absolute inset-6 w-4 h-4 bg-blue-500 rounded-full animate-pulse transition-all duration-300" />
             </div>
-            <div className="text-center space-y-2">
-              <p className="text-gray-200 text-base font-medium">통계 데이터를 불러오는 중...</p>
-              <p className="text-gray-400 text-sm">정렬 결과를 분석하고 있습니다</p>
+            <div className="text-center space-y-2 transition-all duration-500 ease-in-out">
+              <p className="text-gray-200 text-base font-medium transition-opacity duration-300">통계 데이터를 불러오는 중...</p>
+              <p className="text-gray-400 text-sm transition-opacity duration-300 delay-100">정렬 결과를 분석하고 있습니다</p>
               <div className="flex justify-center mt-3">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce transition-all duration-200" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce transition-all duration-200" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce transition-all duration-200" style={{ animationDelay: '300ms' }}></div>
                 </div>
               </div>
             </div>
@@ -193,7 +225,11 @@ ${blueBaseCountText}`;
         )}
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-center">
+          <div className={`bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-400 text-center transition-all duration-500 ease-in-out ${
+            showContent 
+              ? 'opacity-100 transform translate-y-0' 
+              : 'opacity-0 transform translate-y-4'
+          }`}>
             <p className="font-medium text-sm">오류 발생</p>
             <p className="text-xs mt-1">{error}</p>
             <button
@@ -206,7 +242,11 @@ ${blueBaseCountText}`;
         )}
 
         {statistics && !loading && (
-          <div className="space-y-4">
+          <div className={`space-y-4 transition-all duration-500 ease-in-out ${
+            showContent 
+              ? 'opacity-100 transform translate-y-0' 
+              : 'opacity-0 transform translate-y-4'
+          }`}>
             {/* 모든 통계를 하나의 그리드로 통합 */}
             <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
               {/* 기본 정보 */}
