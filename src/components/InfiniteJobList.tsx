@@ -398,7 +398,7 @@ export function InfiniteJobList() {
                       문의하기: {job.id}{" "}
                       {job.taskId && (
                         <a 
-                          href={`http://localhost:5555/task/${job.taskId}`}
+                          href={`/flower/task/${job.taskId}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="underline hover:text-accent-secondary transition-colors"
