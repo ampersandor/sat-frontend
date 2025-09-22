@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { AlignmentRequest } from '../types';
 
 interface AlignmentModalProps {
@@ -10,7 +10,24 @@ interface AlignmentModalProps {
 
 export function AlignmentModal({ isOpen, onClose, onConfirm, fileName }: AlignmentModalProps) {
   const [alignTool, setAlignTool] = useState('mafft');
-  const [options, setOptions] = useState('--auto');
+  const [options, setOptions] = useState('--retree 2 --memsavetree');
+
+  // ESC 키 이벤트 처리
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        handleCancel();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -18,7 +35,7 @@ export function AlignmentModal({ isOpen, onClose, onConfirm, fileName }: Alignme
     const alignmentRequest: AlignmentRequest = {
       user_id: 1, // 기본 사용자 ID (추후 실제 사용자 시스템 연동 시 수정)
       align_tool: alignTool as 'mafft' | 'uclust' | 'vsearch',
-      options: options.trim() || '--auto'
+      options: options.trim() || ''
     };
     onConfirm(alignmentRequest);
     onClose();
@@ -27,7 +44,7 @@ export function AlignmentModal({ isOpen, onClose, onConfirm, fileName }: Alignme
   const handleCancel = () => {
     // 값 초기화
     setAlignTool('mafft');
-    setOptions('--auto');
+    setOptions('--retree 2 --memsavetree');
     onClose();
   };
 
