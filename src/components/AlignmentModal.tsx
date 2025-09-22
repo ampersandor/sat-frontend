@@ -38,9 +38,9 @@ export function AlignmentModal({ isOpen, onClose, onConfirm, fileName }: Alignme
   ];
 
   const commonOptions = {
-    mafft: ['--auto', '--localpair', '--globalpair', '--maxiterate 1000'],
+    mafft: ['--retree 2 --memsavetree', '--auto', '--localpair', '--globalpair', '--maxiterate 1000'],
     uclust: ['--id 0.0 --usersort --maxlen 20000'],
-    vsearch: ['--id 0 --usersort']
+    vsearch: ['--id 0.0 --usersort']
   };
 
   return (
